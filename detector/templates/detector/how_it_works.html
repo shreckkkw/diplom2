@@ -1,0 +1,97 @@
+{% extends 'detector/base.html' %}
+
+{% block title %}Как это работает{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Как это работает</h1>
+  <p>Описание метода для дипломной работы</p>
+</div>
+
+<div class="card">
+  <div class="card-title">1. Постановка задачи</div>
+  <p style="font-size: 0.92rem; line-height: 1.7;">
+    Задача системы — обнаружить подозрительные записи в сетевом трафике без заранее
+    заданных правил для каждого типа атаки. Вместо сигнатурного анализа используется
+    <strong>нейросетевой автоэнкодер</strong>, который учится на примерах нормального трафика
+    и выявляет записи, существенно отличающиеся от привычного поведения сети.
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-title">2. Признаки (features)</div>
+  <p style="font-size: 0.92rem; margin-bottom: 1rem;">
+    Каждое сетевое соединение описывается 8 числовыми признаками:
+  </p>
+  <div class="grid-2">
+    <ul style="font-size: 0.9rem; padding-left: 1.2rem; color: var(--text-muted);">
+      <li>Количество пакетов</li>
+      <li>Объём переданных данных (байт)</li>
+      <li>Длительность соединения (сек)</li>
+      <li>Порт источника и назначения</li>
+    </ul>
+    <ul style="font-size: 0.9rem; padding-left: 1.2rem; color: var(--text-muted);">
+      <li>Код протокола (TCP, UDP, HTTP...)</li>
+      <li>Число соединений в минуту</li>
+      <li>Средний размер пакета</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">3. Архитектура нейросети</div>
+  {% if model_info %}
+  <div class="grid-3" style="margin-bottom: 1rem;">
+    <div><strong>Тип:</strong> {{ model_info.type }}</div>
+    <div><strong>Слои:</strong> {{ model_info.layers }}</div>
+    <div><strong>Активация:</strong> {{ model_info.activation }}</div>
+  </div>
+  <p style="font-size: 0.92rem; line-height: 1.7;">{{ model_info.principle }}</p>
+  {% else %}
+  <p class="text-muted">Модель ещё не обучена. Запустите: <code>py detector/ml/train_model.py</code></p>
+  {% endif %}
+
+  <div class="flow-steps" style="margin-top: 1.5rem;">
+    <div class="flow-step">
+      <div class="num">→</div>
+      <h4>Вход (8)</h4>
+      <p>Нормализованные признаки</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">⇣</div>
+      <h4>Сжатие (16→8)</h4>
+      <p>Энкодер извлекает суть</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">⇡</div>
+      <h4>Восстановление (8→16)</h4>
+      <p>Декодер восстанавливает вход</p>
+    </div>
+    <div class="flow-step">
+      <div class="num">Δ</div>
+      <h4>Ошибка MSE</h4>
+      <p>Сравнение с оригиналом</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">4. Критерий аномалии</div>
+  <p style="font-size: 0.92rem; line-height: 1.7;">
+    Для каждой записи вычисляется <strong>ошибка реконструкции</strong> (MSE) —
+    среднеквадратичное отклонение восстановленных признаков от исходных.
+    При обучении на нормальном трафике определяется порог (95-й перцентиль ошибок).
+    Записи с ошибкой выше порога классифицируются как аномалии.
+    Уровень риска (низкий / средний / высокий) зависит от кратности превышения порога.
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-title">5. Технологический стек</div>
+  <div class="grid-3" style="font-size: 0.9rem;">
+    <div><strong>Backend:</strong> Django (Python)</div>
+    <div><strong>ML:</strong> scikit-learn (MLP)</div>
+    <div><strong>Данные:</strong> pandas, CSV</div>
+  </div>
+</div>
+{% endblock %}

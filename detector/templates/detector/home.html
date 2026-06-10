@@ -1,0 +1,113 @@
+{% extends 'detector/base.html' %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Система детекции аномалий</h1>
+  <p>Нейросетевой анализ сетевого трафика на основе автоэнкодера</p>
+</div>
+
+<div class="grid-4" style="margin-bottom: 1.5rem;">
+  <div class="stat-card stat-blue">
+    <div class="stat-value">{{ total_sessions }}</div>
+    <div class="stat-label">Анализов проведено</div>
+  </div>
+  <div class="stat-card stat-orange">
+    <div class="stat-value danger">{{ total_anomalies }}</div>
+    <div class="stat-label">Аномалий обнаружено</div>
+  </div>
+  <div class="stat-card stat-green">
+    <div class="stat-value">{% if model_ready %}✓{% else %}✗{% endif %}</div>
+    <div class="stat-label">Модель {% if model_ready %}готова{% else %}не обучена{% endif %}</div>
+  </div>
+  <div class="stat-card stat-purple">
+    <div class="stat-value">8</div>
+    <div class="stat-label">Признаков трафика</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Быстрый старт</div>
+    <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.92rem;">
+      Попробуйте систему без подготовки данных — сгенерируйте демо-трафик
+      с встроенными аномалиями и посмотрите, как нейросеть их находит.
+    </p>
+    <a href="{% url 'demo' %}" class="btn btn-coral">Запустить демо</a>
+    <a href="{% url 'upload' %}" class="btn btn-secondary" style="margin-left: 0.5rem;">Загрузить CSV</a>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Принцип работы</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="num">1</div>
+        <h4>Данные</h4>
+        <p>Загрузка записей о сетевых соединениях</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">2</div>
+        <h4>Нейросеть</h4>
+        <p>Автоэнкодер восстанавливает признаки</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">3</div>
+        <h4>Оценка</h4>
+        <p>Высокая ошибка = аномалия</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if model_info %}
+<div class="card">
+  <div class="card-title">Архитектура нейросети</div>
+  <p style="font-size: 0.9rem; margin-bottom: 0.75rem;">{{ model_info.principle }}</p>
+  <div class="grid-3">
+    <div><strong>Тип:</strong> {{ model_info.type }}</div>
+    <div><strong>Слои:</strong> {{ model_info.layers }}</div>
+    <div><strong>Порог:</strong> {{ model_info.threshold }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title">Последние анализы</div>
+  {% if recent_sessions %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Дата</th>
+          <th>Записей</th>
+          <th>Аномалий</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in recent_sessions %}
+        <tr>
+          <td>{{ s.title }}</td>
+          <td>{{ s.created_at|date:"d.m.Y H:i" }}</td>
+          <td>{{ s.total_records }}</td>
+          <td>
+            <span class="badge {% if s.anomaly_count > 0 %}badge-anomaly{% else %}badge-normal{% endif %}">
+              {{ s.anomaly_count }} ({{ s.anomaly_percent }}%)
+            </span>
+          </td>
+          <td><a href="{% url 'session_detail' s.pk %}">Подробнее →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">—</div>
+    <p>Анализов пока нет. Начните с демо-режима!</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

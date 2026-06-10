@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light only">
+  <meta name="theme-color" content="#2563eb">
+  <title>{% block title %}Анализ трафика{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'detector/css/style.css' %}?v=7">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="{% url 'home' %}" class="logo">
+        <div class="logo-text">Анализ трафика</div>
+      </a>
+      <a href="{% url 'home' %}" class="nav-link nav-home {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a>
+      <a href="{% url 'demo' %}" class="nav-link nav-demo {% if request.resolver_match.url_name == 'demo' %}active{% endif %}">Демо-анализ</a>
+      <a href="{% url 'upload' %}" class="nav-link nav-upload {% if request.resolver_match.url_name == 'upload' %}active{% endif %}">Загрузить CSV</a>
+      <a href="{% url 'sessions' %}" class="nav-link nav-sessions {% if 'session' in request.resolver_match.url_name %}active{% endif %}">История</a>
+      <a href="{% url 'how_it_works' %}" class="nav-link nav-how {% if request.resolver_match.url_name == 'how_it_works' %}active{% endif %}">Как это работает</a>
+    </aside>
+
+    <main class="main">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

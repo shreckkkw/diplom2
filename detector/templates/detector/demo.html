@@ -1,0 +1,52 @@
+{% extends 'detector/base.html' %}
+
+{% block title %}Демо-анализ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Демо-анализ</h1>
+  <p>Система сгенерирует тестовый трафик и проанализирует его нейросетью</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Параметры генерации</div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{{ form.title.label }}</label>
+        {{ form.title }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.record_count.label }}</label>
+        {{ form.record_count }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.anomaly_ratio.label }}</label>
+        {{ form.anomaly_ratio }}
+        <div class="form-help">{{ form.anomaly_ratio.help_text }}</div>
+      </div>
+      <button type="submit" class="btn btn-coral">Сгенерировать и проанализировать</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Что будет сгенерировано?</div>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+      Демо-режим создаёт два типа записей:
+    </p>
+    <div style="margin-bottom: 0.75rem;">
+      <span class="badge badge-normal">Нормальный</span>
+      <span style="font-size: 0.85rem; margin-left: 0.5rem;">Обычный веб, DNS, TCP/UDP трафик</span>
+    </div>
+    <div style="margin-bottom: 0.75rem;">
+      <span class="badge badge-high">Аномальный</span>
+      <span style="font-size: 0.85rem; margin-left: 0.5rem;">Flood-атака, сканирование портов, утечка данных</span>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted);">
+      Нейросеть не знает тип атаки заранее — она определяет аномалию
+      только по отклонению признаков от «нормального» шаблона.
+    </p>
+  </div>
+</div>
+{% endblock %}

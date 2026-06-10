@@ -1,0 +1,108 @@
+{% extends 'detector/base.html' %}
+
+{% block title %}{{ session.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ session.title }}</h1>
+  <p>{{ session.created_at|date:"d.m.Y в H:i" }} · {{ session.total_records }} записей</p>
+</div>
+
+<div class="grid-4" style="margin-bottom: 1.5rem;">
+  <div class="stat-card stat-blue">
+    <div class="stat-value">{{ session.total_records }}</div>
+    <div class="stat-label">Всего записей</div>
+  </div>
+  <div class="stat-card stat-orange">
+    <div class="stat-value danger">{{ session.anomaly_count }}</div>
+    <div class="stat-label">Аномалий</div>
+  </div>
+  <div class="stat-card stat-teal">
+    <div class="stat-value">{{ session.anomaly_percent }}%</div>
+    <div class="stat-label">Доля аномалий</div>
+  </div>
+  <div class="stat-card stat-green">
+    <div class="stat-value">{{ normal_count }}</div>
+    <div class="stat-label">Нормальных</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Распределение по уровню риска</div>
+    {% for stat in risk_stats %}
+    <div class="risk-row {% if stat.risk_level == 'норма' %}risk-row-normal{% elif stat.risk_level == 'низкий' %}risk-row-low{% elif stat.risk_level == 'средний' %}risk-row-medium{% else %}risk-row-high{% endif %}">
+      <span>
+        {% if stat.risk_level == 'норма' %}<span class="badge badge-normal">{% elif stat.risk_level == 'низкий' %}<span class="badge badge-low">{% elif stat.risk_level == 'средний' %}<span class="badge badge-medium">{% else %}<span class="badge badge-high">{% endif %}
+        {{ stat.risk_level }}
+        </span>
+      </span>
+      <strong>{{ stat.count }}</strong>
+    </div>
+    {% empty %}
+    <p class="text-muted">Нет данных</p>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-title">Аномалии по протоколам</div>
+    {% for stat in protocol_stats %}
+    <div class="proto-row">
+      <span>{{ stat.protocol|upper }}</span>
+      <strong>{{ stat.count }}</strong>
+    </div>
+    {% empty %}
+    <p class="text-muted">Аномалий не обнаружено</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Записи трафика</div>
+
+  <div class="filter-tabs">
+    <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">Все</a>
+    <a href="?filter=anomaly" class="filter-tab {% if filter_type == 'anomaly' %}active{% endif %}">Аномалии</a>
+    <a href="?filter=normal" class="filter-tab {% if filter_type == 'normal' %}active{% endif %}">Норма</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Источник</th>
+          <th>Назначение</th>
+          <th>Протокол</th>
+          <th>Пакетов</th>
+          <th>Байт</th>
+          <th>Ошибка</th>
+          <th>Риск</th>
+          <th>Отклонения</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ r.source_ip }}</td>
+          <td>{{ r.dest_ip }}</td>
+          <td>{{ r.protocol }}</td>
+          <td>{{ r.packet_count }}</td>
+          <td>{{ r.byte_volume }}</td>
+          <td>{{ r.reconstruction_error|floatformat:4 }}</td>
+          <td>
+            {% if r.risk_level == 'норма' %}<span class="badge badge-normal">{% elif r.risk_level == 'низкий' %}<span class="badge badge-low">{% elif r.risk_level == 'средний' %}<span class="badge badge-medium">{% else %}<span class="badge badge-high">{% endif %}
+            {{ r.risk_level }}
+            </span>
+          </td>
+          <td style="font-size: 0.78rem;">
+            {% for d in r.deviations_json %}
+            {{ d.label }} ({{ d.deviation }}){% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

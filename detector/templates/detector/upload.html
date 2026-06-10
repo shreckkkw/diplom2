@@ -1,0 +1,58 @@
+{% extends 'detector/base.html' %}
+
+{% block title %}Загрузка CSV{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Загрузка данных</h1>
+  <p>Загрузите CSV-файл с записями сетевого трафика для анализа</p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Файл трафика</div>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>{{ form.title.label }}</label>
+        {{ form.title }}
+      </div>
+      <div class="form-group">
+        <label>{{ form.csv_file.label }}</label>
+        {{ form.csv_file }}
+        <div class="form-help">{{ form.csv_file.help_text }}</div>
+      </div>
+      <button type="submit" class="btn btn-primary">Анализировать</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Формат CSV-файла</div>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+      Каждая строка — одно сетевое соединение. Обязательные столбцы:
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Столбец</th><th>Описание</th><th>Пример</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>source_ip</td><td>IP источника</td><td>192.168.1.10</td></tr>
+          <tr><td>dest_ip</td><td>IP назначения</td><td>10.0.0.5</td></tr>
+          <tr><td>protocol</td><td>Протокол</td><td>tcp, udp, http</td></tr>
+          <tr><td>packet_count</td><td>Кол-во пакетов</td><td>150</td></tr>
+          <tr><td>byte_volume</td><td>Объём (байт)</td><td>45000</td></tr>
+          <tr><td>duration_sec</td><td>Длительность (сек)</td><td>12.5</td></tr>
+          <tr><td>src_port</td><td>Порт источника</td><td>54321</td></tr>
+          <tr><td>dst_port</td><td>Порт назначения</td><td>443</td></tr>
+          <tr><td>connections_per_min</td><td>Соединений/мин</td><td>5.2</td></tr>
+          <tr><td>avg_packet_size</td><td>Средний размер пакета</td><td>800</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top: 1rem; font-size: 0.85rem;">
+      Пример файла: <code>sample_data/traffic_sample.csv</code>
+    </p>
+  </div>
+</div>
+{% endblock %}
